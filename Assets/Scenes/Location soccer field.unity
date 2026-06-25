@@ -1284,7 +1284,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eb6b6b2ccad95dc4e9833ec5bd9d23f1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMovement
-  speed: 3
+  speed: 5
   moveAction:
     m_Name: Move
     m_Type: 0
@@ -1367,7 +1367,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerKick
   kickButton: {fileID: 2043634838}
   interactRadius: 1.5
-  kickForce: 10
+  kickForce: 15
   obstacleMask:
     serializedVersion: 2
     m_Bits: 64
