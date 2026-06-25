@@ -26,6 +26,10 @@ public class PlayerMovement : MonoBehaviour
     private void Update()
     {
         Vector2 moveInput = moveAction.ReadValue<Vector2>();
+        
+        if (GameManager.Instance != null && GameManager.Instance.IsInputLocked)
+            moveInput = Vector2.zero;
+        
         direction = stateMachine.RunState(moveInput);
 
         if (direction != Vector3.zero)

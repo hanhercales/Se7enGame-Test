@@ -21,6 +21,12 @@ public class PlayerKick : MonoBehaviour
     private void Update()
     {
         if (kickButton == null) return;
+        
+        if (GameManager.Instance != null && GameManager.Instance.IsInputLocked)
+        {
+            kickButton.SetActive(false);
+            return;
+        }
 
         bool isNearBall = CheckInRadius();
         
@@ -43,17 +49,35 @@ public class PlayerKick : MonoBehaviour
 
     public void ExecuteKick()
     {
-        Rigidbody ballRb = GetNearestBall();
-        if (ballRb == null || goals.Length < 2) return;
-
-        Transform targetGoal = GetTargetGoal(ballRb.transform.position);
+        if (GameManager.Instance != null && GameManager.Instance.IsInputLocked) return;
         
-        Vector3 kickDirection = (targetGoal.position - ballRb.transform.position).normalized;
-        kickDirection.y = 0.25f;
-        
-        ballRb.AddForce(kickDirection * kickForce, ForceMode.Impulse);
+        Rigidbody targetBall = GetNearestBall();
+        PerformKick(targetBall);
     }
 
+    public void ExecuteAutoKick()
+    {
+        if (GameManager.Instance != null && GameManager.Instance.IsInputLocked) return;
+        
+        Rigidbody furthestBall = GetFurthestBall();
+        PerformKick(furthestBall);
+    }
+
+    private void PerformKick(Rigidbody targetBall)
+    {
+        if (targetBall == null || goals == null || goals.Length < 2) return;
+
+        Transform targetGoal = GetTargetGoal(targetBall.position);
+
+        Vector3 kickDirection = (targetGoal.position - targetBall.position).normalized;
+        kickDirection.y = 0.25f;
+
+        targetBall.linearVelocity = Vector3.zero; 
+        targetBall.AddForce(kickDirection * kickForce, ForceMode.Impulse);
+        
+        GameManager.Instance.SetCameraTarget(targetBall.transform, 0f);
+        GameManager.Instance.ReturnCamera(5f);
+    }
     private Rigidbody GetNearestBall()
     {
         Collider[] hitColliders = Physics.OverlapSphere(transform.position, interactRadius);
@@ -74,6 +98,24 @@ public class PlayerKick : MonoBehaviour
         }
         
         return  nearestBall;
+    }
+    
+    private Rigidbody GetFurthestBall()
+    {
+        GameObject[] allBalls = GameObject.FindGameObjectsWithTag("Ball");
+        Rigidbody furthestBallRb = null;
+        float maxSqrDistance = -1f;
+
+        foreach (GameObject ballObj in allBalls)
+        {
+            float sqrDistance = (ballObj.transform.position - transform.position).sqrMagnitude;
+            if (sqrDistance > maxSqrDistance)
+            {
+                maxSqrDistance = sqrDistance;
+                furthestBallRb = ballObj.GetComponent<Rigidbody>();
+            }
+        }
+        return furthestBallRb;
     }
 
     private Transform GetTargetGoal(Vector3 position)
